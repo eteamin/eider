@@ -1,6 +1,6 @@
-aiohttp
-pytest-aiohttp
 pytest-runner
 gino
 aiocontextvars
 pyyaml
+websockets
+aiofiles

@@ -1,9 +1,21 @@
-from tests import test_fixture
+import asyncio
+import websockets
 
-f = test_fixture
+from eider.utils import parse
 
 
-async def test_add_user_info(f):
-    resp = await f.get('/api/v1/')
-    assert resp.status == 200
-    assert await resp.json() == {'some_key': 'some_value'}
+async def setup():
+    pass
+
+async def teardown():
+    pass
+
+
+async def test_send_text_message(uri):
+    async with websockets.connect(uri) as websocket:
+        resp = await parse(websocket.send("Hello"))
+        assert resp.get('ack') is True
+
+
+asyncio.get_event_loop().run_until_complete(
+    test_send_text_message('ws://localhost:8765'))

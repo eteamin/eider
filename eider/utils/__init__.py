@@ -1,5 +1,6 @@
 from os import path, getcwd
 import yaml
+from json import loads, JSONDecodeError
 
 
 def load_config_file(test=False):
@@ -12,3 +13,10 @@ def load_config_file(test=False):
         return yaml.load(conf)
     finally:
         conf.close()
+
+
+def parse(data):
+    try:
+        return loads(data)
+    except JSONDecodeError:
+        return
