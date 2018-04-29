@@ -4,8 +4,6 @@ from gino import Gino
 db = Gino()
 
 
-
-
 async def main():
     await db.set_bind('postgresql://localhost/gino')
     await db.gino.create_all()
