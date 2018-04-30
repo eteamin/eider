@@ -1,6 +1,8 @@
 from os import path, getcwd
-import yaml
 from json import loads, JSONDecodeError
+
+import websockets
+import yaml
 
 
 def load_config_file(test=False):
@@ -20,3 +22,8 @@ def parse(data):
         return loads(data)
     except JSONDecodeError:
         return
+
+
+async def transfer(uri, payload):
+    async with websockets.connect(uri) as websocket:
+        return await websocket.send(bytes(payload))

@@ -6,14 +6,6 @@ from eider.utils import parse, load_config_file
 CONFIGURATION = load_config_file(test=True)
 
 
-async def setup():
-    pass
-
-
-async def teardown():
-    pass
-
-
 async def test_send_text_message(uri):
     async with websockets.connect(uri) as websocket:
         resp = await parse(websocket.send("Hello"))
