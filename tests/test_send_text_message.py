@@ -1,11 +1,14 @@
 import asyncio
 import websockets
 
-from eider.utils import parse
+from eider.utils import parse, load_config_file
+
+CONFIGURATION = load_config_file(test=True)
 
 
 async def setup():
     pass
+
 
 async def teardown():
     pass
@@ -18,4 +21,10 @@ async def test_send_text_message(uri):
 
 
 asyncio.get_event_loop().run_until_complete(
-    test_send_text_message('ws://localhost:8765'))
+    test_send_text_message(
+        '{}:{}/api/message'.format(
+            CONFIGURATION.get('host'),
+            CONFIGURATION.get('port')
+        )
+    )
+)
