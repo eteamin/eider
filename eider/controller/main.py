@@ -1,24 +1,45 @@
 import asyncio
-from queue import Queue
+from asyncio.queues import QueueEmpty
 
 import websockets
 
-
-async def store_tasks():
-    pass
+tasks = asyncio.Queue()
 
 
-async def to_tasks():
-    pass
+async def consumer(websocket):
+    async for message in websocket:
+        print(message)
+        await tasks.put(message)
 
 
-async def interpret_task():
+async def producer(websocket):
+    while True:
+        try:
+            task = await tasks.get()
+            print(task)
+            await do_task(task)
+        except QueueEmpty:
+            continue
+
+
+async def do_task(task):
     pass
 
 
 async def worker(websocket, path):
-    pass
+    consumer_task = asyncio.ensure_future(consumer(websocket))
+    producer_task = asyncio.ensure_future(producer(websocket))
+    done, pending = await asyncio.wait(
+        [consumer_task, producer_task],
+        return_when=asyncio.FIRST_COMPLETED,
+    )
+
+    async for task in pending:
+        task.cancel()
+
 
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(worker())
+    start_server = websockets.serve(worker, '127.0.0.1', 5678)
+
+    asyncio.get_event_loop().run_until_complete(start_server)
+    asyncio.get_event_loop().run_forever()
