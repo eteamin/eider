@@ -17,13 +17,13 @@ async def producer(websocket):
         try:
             task = await tasks.get()
             print(task)
-            await do_task(task)
+            await do_task(websocket, task)
         except QueueEmpty:
             continue
 
 
-async def do_task(task):
-    pass
+async def do_task(websocket, task):
+    await websocket.send(task)
 
 
 async def worker(websocket, path):
@@ -34,7 +34,7 @@ async def worker(websocket, path):
         return_when=asyncio.FIRST_COMPLETED,
     )
 
-    async for task in pending:
+    for task in pending:
         task.cancel()
 
 
