@@ -1,3 +1,4 @@
+import json
 import asyncio
 from asyncio.queues import QueueEmpty
 
@@ -7,23 +8,26 @@ tasks = asyncio.Queue()
 
 
 async def consumer(websocket):
-    async for message in websocket:
-        print(message)
-        await tasks.put(message)
+    async for job in websocket:
+        await tasks.put(job)
 
 
 async def producer(websocket):
     while True:
         try:
             task = await tasks.get()
-            print(task)
             await do_task(websocket, task)
         except QueueEmpty:
             continue
 
 
 async def do_task(websocket, task):
-    await websocket.send(task)
+    pass
+
+
+async def digest_task(task):
+    payload = json.loads(task)
+    # if task == json.loads(task)
 
 
 async def worker(websocket, path):

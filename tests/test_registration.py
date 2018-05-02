@@ -7,6 +7,7 @@ CONFIGURATION = load_config_file(test=True)
 
 async def test_registration(uri):
     payload = {
+        'task': 'registration',
         'username': 'test'
     }
     resp = await transfer(uri, payload)
@@ -15,7 +16,7 @@ async def test_registration(uri):
 
 asyncio.get_event_loop().run_until_complete(
     test_registration(
-        '{}:{}/api/message'.format(
+        '{}:{}'.format(
             CONFIGURATION.get('host'),
             CONFIGURATION.get('port')
         )
