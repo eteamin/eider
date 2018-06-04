@@ -1,6 +1,1 @@
-pytest-runner
-gino
-aiocontextvars
-pyyaml
-websockets
-aiofiles
+twisted
