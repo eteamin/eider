@@ -1,5 +1,7 @@
 import json
+from json.decoder import JSONDecodeError
 
+from autobahn.twisted.websocket import WebSocketServerProtocol, WebSocketServerFactory
 from twisted.internet import reactor, protocol, error
 from twisted.protocols import basic
 from twisted.python import failure
@@ -11,19 +13,15 @@ connectionDone = failure.Failure(error.ConnectionDone())
 connectionDone.cleanFailure()
 
 
-class EiderProtocol(basic.LineReceiver):
-    def __init__(self, factory):
-        self.factory = factory
-
-    def connectionMade(self):
+class EiderProtocol(WebSocketServerProtocol):
+    def onConnect(self, request):
         self.factory.clients[generate_uuid()] = self.transport
 
-    def connectionLost(self, reason=connectionDone):
-        # TODO: Figure out a way to handle this
-        self.factory.clients.remove(self)
+    def onMessage(self, payload, isBinary):
+        self._digest_incoming_data(payload)
 
-    def dataReceived(self, data):
-        self._digest_incoming_data(data)
+    def onClose(self, wasClean, code, reason):
+        self.factory.clients = dict()
 
     def alive(self, payload=None):
         resp = {
@@ -48,27 +46,28 @@ class EiderProtocol(basic.LineReceiver):
         self._talk_back(json.dumps(resp))
 
     def _talk_back(self, data, receiver=None):
-        if receiver:
-            receiver.write(data.encode("utf-8"))
-        else:
-            self.transport.write(data.encode("utf-8"))
+        self.sendMessage(data.encode("utf-8"))
 
     def _de_jsonize(self, data):
-        return json.loads(data.decode("utf-8"))
+        try:
+            return json.loads(data.decode("utf-8"))
+        except (JSONDecodeError, UnicodeDecodeError):
+            return {}
 
     def _digest_incoming_data(self, data):
         _data = self._de_jsonize(data)
-        method = getattr(self, _data.get("operation"))
+        if not _data:
+            return
+        try:
+            method = getattr(self, _data.get("operation"))
+        except AttributeError:
+            return
         method(_data.get("payload"))
 
 
-class EiderFactory(protocol.Factory):
-    def __init__(self):
-        self.clients = dict()
+if __name__ == '__main__':
+    factory = WebSocketServerFactory(u"ws://172.20.10.3:8585")
+    factory.protocol = EiderProtocol
 
-    def buildProtocol(self, addr):
-        return EiderProtocol(self)
-
-
-reactor.listenTCP(0, EiderFactory())
-reactor.run()
+    reactor.listenTCP(8585, factory)
+    reactor.run()
