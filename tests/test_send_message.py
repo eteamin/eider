@@ -13,16 +13,15 @@ class EiderTestCase(unittest.TestCase):
         self.tr = proto_helpers.StringTransport()
         self.proto.makeConnection(self.tr)
 
-        # We need to get all users to have someone to talk to!
-        payload = json.dumps({
+        # We need to get all users to find someone to talk to!
+        payload = {
             "operation": "get_all_users",
             "payload": None
-        }).encode("utf-8")
-
-        self.proto.dataReceived(payload)
+        }
+        self.transfer(payload)
         resp = json.loads(self.tr.value().decode("utf-8"))
-        self.tr.clear()
         self.receiver = resp.get("users")[0]
+        self.tr.clear()
 
     def test_send_message(self):
         message = {
@@ -37,6 +36,9 @@ class EiderTestCase(unittest.TestCase):
         self.proto.dataReceived(payload)
         resp = json.loads(self.tr.value().decode("utf-8"))
         assert resp.get("text") == message.get("text")
+
+    def transfer(self, data):
+        self.proto.dataReceived(json.dumps(data).encode("utf-8"))
 
 
 if __name__ == '__main__':
