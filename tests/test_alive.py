@@ -1,17 +1,10 @@
 import json
+import unittest
 
-from twisted.trial import unittest
-from twisted.test import proto_helpers
-
-from eider.handler.factory import EiderFactory
+from tests import EiderTestCase
 
 
-class EiderTestCase(unittest.TestCase):
-    def setUp(self):
-        factory = EiderFactory()
-        self.proto = factory.buildProtocol(('127.0.0.1', 0))
-        self.tr = proto_helpers.StringTransport()
-        self.proto.makeConnection(self.tr)
+class TestAlive(EiderTestCase):
 
     def test_alive(self):
         payload = json.dumps({
@@ -21,8 +14,8 @@ class EiderTestCase(unittest.TestCase):
         expected = {
             "alive": True
         }
-        self.proto.dataReceived(payload)
-        self.assertDictEqual(json.loads(self.tr.value().decode("utf-8")), expected)
+        self.protocol.onMessage(payload, False)
+        self.assertEqual(json.loads(self.transport.value().decode("utf-8")), expected)
 
 
 if __name__ == '__main__':

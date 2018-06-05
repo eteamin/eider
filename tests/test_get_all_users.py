@@ -3,15 +3,16 @@ import json
 from twisted.trial import unittest
 from twisted.test import proto_helpers
 
-from eider.handler.factory import EiderFactory
+from tests import MyProtocolFactory
 
 
 class EiderTestCase(unittest.TestCase):
     def setUp(self):
-        factory = EiderFactory()
-        self.proto = factory.buildProtocol(('127.0.0.1', 0))
-        self.tr = proto_helpers.StringTransport()
-        self.proto.makeConnection(self.tr)
+        factory = MyProtocolFactory()
+        protocol = factory.buildProtocol(None)
+        transport = proto_helpers.StringTransport()
+        protocol.makeConnection(transport)
+        self.protocol, self.transport = protocol, transport
 
     def test_get_all_users(self):
         payload = json.dumps({
