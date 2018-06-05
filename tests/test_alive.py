@@ -1,10 +1,10 @@
 import json
-import unittest
+from twisted.trial import unittest
 
 from tests import EiderTestCase
 
 
-class TestAlive(EiderTestCase):
+class AliveTestCase(EiderTestCase):
 
     def test_alive(self):
         payload = json.dumps({

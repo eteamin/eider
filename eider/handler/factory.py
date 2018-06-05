@@ -43,7 +43,22 @@ class EiderProtocol(WebSocketServerProtocol):
         resp = {
             "users": resp
         }
-        self._talk_back(json.dumps(resp))
+        self.transfer(resp)
+
+    def deliver_message(self, payload):
+        # # Ack
+        # resp = {
+        #     "ok": True
+        # }
+        # self.transfer(resp)
+
+        # Deliver the message
+        to = self.factory.clients.get(payload["receiver"])
+
+        message = {
+            "text": payload.get("text")
+        }
+        self.transfer(message, to)
 
     # noinspection PyMethodMayBeStatic
     def load(self, data):
