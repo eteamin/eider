@@ -19,10 +19,11 @@ class EiderProtocol(basic.LineReceiver):
         self.factory.clients[generate_uuid()] = self.transport
 
     def connectionLost(self, reason=connectionDone):
+        # TODO: Figure out a way to handle this
         self.factory.clients.remove(self)
 
     def dataReceived(self, data):
-        self._distribute(data)
+        self._digest_incoming_data(data)
 
     def alive(self, payload=None):
         resp = {
@@ -31,7 +32,11 @@ class EiderProtocol(basic.LineReceiver):
         self._talk_back(json.dumps(resp))
 
     def send_message(self, payload):
-        pass
+        receiver = self.factory.clients.get(payload.get("receiver"))
+        _payload = {
+            "text": payload.get("text")
+        }
+        self._talk_back(json.dumps(_payload), receiver=receiver)
 
     def get_all_users(self, payload=None):
         resp = []
@@ -42,13 +47,16 @@ class EiderProtocol(basic.LineReceiver):
         }
         self._talk_back(json.dumps(resp))
 
-    def _talk_back(self, data):
-        self.transport.write(data.encode("utf-8"))
+    def _talk_back(self, data, receiver=None):
+        if receiver:
+            receiver.write(data.encode("utf-8"))
+        else:
+            self.transport.write(data.encode("utf-8"))
 
     def _de_jsonize(self, data):
         return json.loads(data.decode("utf-8"))
 
-    def _distribute(self, data):
+    def _digest_incoming_data(self, data):
         _data = self._de_jsonize(data)
         method = getattr(self, _data.get("operation"))
         method(_data.get("payload"))

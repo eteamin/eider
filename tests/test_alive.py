@@ -13,7 +13,7 @@ class EiderTestCase(unittest.TestCase):
         self.tr = proto_helpers.StringTransport()
         self.proto.makeConnection(self.tr)
 
-    def test_echo(self):
+    def test_alive(self):
         payload = json.dumps({
             "operation": "alive",
             "payload": None
