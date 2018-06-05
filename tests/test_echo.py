@@ -1,28 +1,28 @@
+import json
+
 from twisted.trial import unittest
 from twisted.test import proto_helpers
 
-from eider.handler.factory import EiderProtocol
+from eider.handler.factory import EiderFactory
 
 
 class TestSimpleConnection(unittest.TestCase):
     def setUp(self):
+        factory = EiderFactory()
+        self.proto = factory.buildProtocol(('127.0.0.1', 0))
         self.tr = proto_helpers.StringTransport()
-        self.proto = EiderProtocol()
         self.proto.makeConnection(self.tr)
 
-    def _test(self, operation, payload, expected):
-        d = getattr(self.proto, operation)(payload)
-        self.assertEqual(
-            self.tr.value(),
-            u'{} {}\r\n'.format(operation, payload).encode('utf-8')
-        )
-        self.tr.clear()
-        d.addCallback(self.assertEqual, expected.encode("utf-8"))
-        self.proto.dataReceived(u"{}\r\n".format(expected).encode('utf-8'))
-        return d
+    def _test(self, payload, expected):
+        self.proto.dataReceived(payload)
+        self.assertEqual(self.tr.value(), bytes(expected))
 
     def test_echo(self):
-        return self._test('echo', "hi", "hi")
+        payload = json.dumps({
+            "operation": "echo",
+            "payload": None
+        }).encode("utf-8")
+        return self._test(payload, True)
 
 
 if __name__ == '__main__':
