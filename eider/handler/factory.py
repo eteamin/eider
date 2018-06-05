@@ -30,8 +30,17 @@ class EiderProtocol(basic.LineReceiver):
         }
         self._talk_back(json.dumps(resp))
 
-    def get_all_users(self, payload=None):
+    def send_message(self, payload):
         pass
+
+    def get_all_users(self, payload=None):
+        resp = []
+        for k, v in self.factory.clients.items():
+            resp.append(k)
+        resp = {
+            "users": resp
+        }
+        self._talk_back(json.dumps(resp))
 
     def _talk_back(self, data):
         self.transport.write(data.encode("utf-8"))

@@ -13,16 +13,15 @@ class EiderTestCase(unittest.TestCase):
         self.tr = proto_helpers.StringTransport()
         self.proto.makeConnection(self.tr)
 
-    def test_echo(self):
+    def test_get_all_users(self):
         payload = json.dumps({
-            "operation": "alive",
+            "operation": "get_all_users",
             "payload": None
         }).encode("utf-8")
-        expected = {
-            "alive": True
-        }
+
         self.proto.dataReceived(payload)
-        self.assertDictEqual(json.loads(self.tr.value().decode("utf-8")), expected)
+        resp = json.loads(self.tr.value().decode("utf-8"))
+        self.assertEqual(len(resp.get('users')), 1)
 
 
 if __name__ == '__main__':
