@@ -13,14 +13,18 @@ connectionDone.cleanFailure()
 
 class EiderProtocol(WebSocketServerProtocol):
     def onConnect(self, request):
+        print(request)
         self.factory.clients[generate_uuid()] = self.transport
 
     def onMessage(self, payload, isBinary):
+        print(payload)
         self._digest_incoming_data(payload)
 
     def onClose(self, wasClean, code, reason):
-        # TODO: Handle this
-        pass
+        print(wasClean, code, reason)
+
+    def connectionLost(self, reason):
+        print(reason)
 
     # noinspection PyUnusedLocal
     def alive(self, payload=None):
@@ -28,12 +32,6 @@ class EiderProtocol(WebSocketServerProtocol):
             "alive": True
         }
         self.transfer(resp)
-
-    def transfer(self, payload, to=None):
-        if not to:
-            to = self.transport
-
-        to.write(json.dumps(payload).encode("utf-8"))
 
     # noinspection PyUnusedLocal
     def get_all_users(self, payload=None):
@@ -76,6 +74,12 @@ class EiderProtocol(WebSocketServerProtocol):
         except AttributeError:
             return
         method(_data.get("payload"))
+
+    def transfer(self, payload, to=None):
+        if not to:
+            to = self.transport
+        print(payload)
+        self.sendMessage(json.dumps(payload).encode("utf-8"))
 
 
 if __name__ == '__main__':
