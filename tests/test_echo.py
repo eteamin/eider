@@ -10,19 +10,19 @@ class TestSimpleConnection(unittest.TestCase):
         self.proto = EiderProtocol()
         self.proto.makeConnection(self.tr)
 
-    def _test(self, operation, a, b, expected):
-        d = getattr(self.proto, operation)(a, b)
+    def _test(self, operation, payload, expected):
+        d = getattr(self.proto, operation)(payload)
         self.assertEqual(
             self.tr.value(),
-            u'{} {} {}\r\n'.format(operation, a, b).encode('utf-8')
+            u'{} {}\r\n'.format(operation, payload).encode('utf-8')
         )
         self.tr.clear()
-        d.addCallback(self.assertEqual, expected)
-        self.proto.dataReceived(u"{}\r\n".format(expected, ).encode('utf-8'))
+        d.addCallback(self.assertEqual, expected.encode("utf-8"))
+        self.proto.dataReceived(u"{}\r\n".format(expected).encode('utf-8'))
         return d
 
-    def test_add(self):
-        return self._test('add', 7, 6, 13)
+    def test_echo(self):
+        return self._test('echo', "hi", "hi")
 
 
 if __name__ == '__main__':

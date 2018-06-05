@@ -25,17 +25,17 @@ class EiderProtocol(basic.LineReceiver):
 
     def lineReceived(self, line):
         d = self.results.pop(0)
-        d.callback(int(line))
+        d.callback(line)
 
-    def _sendOperation(self, op, a, b):
+    def _sendOperation(self, op, payload):
         d = defer.Deferred()
         self.results.append(d)
-        line = u"{} {} {}".format(op, a, b).encode('utf-8')
+        line = u"{} {}".format(op, payload).encode('utf-8')
         self.sendLine(line)
         return d
 
-    def add(self, a, b):
-        return self._sendOperation("add", a, b)
+    def echo(self, payload):
+        return self._sendOperation("echo", payload)
 
 
 class EiderFactory(protocol.Factory):
