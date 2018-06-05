@@ -22,17 +22,26 @@ class EiderProtocol(basic.LineReceiver):
         self.factory.clients.remove(self)
 
     def dataReceived(self, data):
-        self.distribute(data)
+        self._distribute(data)
 
-    def echo(self, payload=None):
-        self.transport.write(bytes(True))
+    def alive(self, payload=None):
+        resp = {
+            "alive": True
+        }
+        self._talk_back(json.dumps(resp))
+
+    def get_all_users(self, payload=None):
+        pass
+
+    def _talk_back(self, data):
+        self.transport.write(data.encode("utf-8"))
 
     def _de_jsonize(self, data):
         return json.loads(data.decode("utf-8"))
 
-    def distribute(self, data):
+    def _distribute(self, data):
         _data = self._de_jsonize(data)
-        method = getattr(self, _data.get('operation'))
+        method = getattr(self, _data.get("operation"))
         method(_data.get("payload"))
 
 

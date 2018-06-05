@@ -15,14 +15,17 @@ class TestSimpleConnection(unittest.TestCase):
 
     def _test(self, payload, expected):
         self.proto.dataReceived(payload)
-        self.assertEqual(self.tr.value(), bytes(expected))
+        self.assertDictEqual(json.loads(self.tr.value().decode("utf-8")), expected)
 
     def test_echo(self):
         payload = json.dumps({
-            "operation": "echo",
+            "operation": "alive",
             "payload": None
         }).encode("utf-8")
-        return self._test(payload, True)
+        expected = {
+            "alive": True
+        }
+        return self._test(payload, expected)
 
 
 if __name__ == '__main__':
