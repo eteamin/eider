@@ -13,18 +13,16 @@ connectionDone.cleanFailure()
 
 class EiderProtocol(WebSocketServerProtocol):
     def onConnect(self, request):
-        print(request)
         self.factory.clients[generate_uuid()] = self.transport
 
     def onMessage(self, payload, isBinary):
-        print(payload)
         self._digest_incoming_data(payload)
 
     def onClose(self, wasClean, code, reason):
-        print(wasClean, code, reason)
+        pass
 
     def connectionLost(self, reason):
-        print(reason)
+        pass
 
     # noinspection PyUnusedLocal
     def alive(self, payload=None):
